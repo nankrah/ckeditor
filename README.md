@@ -5,18 +5,26 @@ CKEditor is a ready-for-use HTML text editor designed to simplify web content cr
 
 ## Features
 
-* Ckeditor version 4.3.1 (full)
+* Ckeditor version 4.3.2 (full)
 * Rails 4 integration
 * Files browser
 * HTML5 files uploader
 * Hooks for formtastic and simple_form forms generators
+* Integrated with authorization framework CanCan and Pundit
 
 ## Installation
 
 For basic usage just include ckeditor gem:
 
 ```
-gem "ckeditor"
+gem 'ckeditor'
+```
+#### Using with ruby 1.8.7
+
+For usage with ruby 1.8.7 you need to specify gem version:
+
+```
+gem 'ckeditor', '4.0.4'
 ```
 
 For files uploading support you need generage models for file storage.
@@ -32,7 +40,7 @@ Currently supported next backends:
 For active_record orm is used paperclip gem (it's by default).
 
 ```
-gem "paperclip"
+gem 'paperclip'
 
 rails generate ckeditor:install --orm=active_record --backend=paperclip
 ```
@@ -40,8 +48,8 @@ rails generate ckeditor:install --orm=active_record --backend=paperclip
 #### ActiveRecord + carrierwave
 
 ```
-gem "carrierwave"
-gem "mini_magick"
+gem 'carrierwave'
+gem 'mini_magick'
 
 rails generate ckeditor:install --orm=active_record --backend=carrierwave
 ```
@@ -57,8 +65,8 @@ rails generate ckeditor:install --orm=mongoid --backend=paperclip
 #### Mongoid + carrierwave
 
 ```
-gem "carrierwave-mongoid", :require => 'carrierwave/mongoid'
-gem "mini_magick"
+gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+gem 'mini_magick'
 
 rails generate ckeditor:install --orm=mongoid --backend=carrierwave
 ```
@@ -75,7 +83,7 @@ config.autoload_paths += %W(#{config.root}/app/models/ckeditor)
 Mount engine in your routes (config/routes.rb):
 
 ```ruby
-mount Ckeditor::Engine => "/ckeditor"
+mount Ckeditor::Engine => '/ckeditor'
 ```
 
 ## Usage
@@ -91,11 +99,11 @@ Form helpers:
 ```erb
 <%= form_for @page do |form| -%>
   ...
-  <%= form.cktext_area :notes, :class => "someclass", :ckeditor => {:language => "uk"} %>
+  <%= form.cktext_area :notes, :class => 'someclass', :ckeditor => {:language => 'uk'} %>
   ...
-  <%= form.cktext_area :content, :value => "Default value", :id => "sometext" %>
+  <%= form.cktext_area :content, :value => 'Default value', :id => 'sometext' %>
   ...
-  <%= cktext_area :page, :info, :cols => 40, :ckeditor => {:uiColor => "#AADC6E", :toolbar => "mini"} %>
+  <%= cktext_area :page, :info, :cols => 40, :ckeditor => {:uiColor => '#AADC6E', :toolbar => 'mini'} %>
   ...
 <% end -%>
 ```
@@ -158,7 +166,7 @@ after 'deploy:assets:precompile', 'copy_nondigest_assets'
 Periodically check your error monitoring tool, if you see some part of ckeditor try to load
 unexisting non-digest asset - if so just add it in the ckeditor rake task.
 
-Also you can use gem [non-stupid-digest-assets](https://rubygems.org/gems/non-stupid-digest-assets), which do the same work. 
+Also you can use gem [non-stupid-digest-assets](https://rubygems.org/gems/non-stupid-digest-assets), which do the same work.
 
 To reduce the asset precompilation time, you can limit plugins and/or languages to those you need:
 
@@ -178,7 +186,7 @@ jQuery sample:
 ```html
 <script type='text/javascript' charset='UTF-8'>
   $(document).ready(function(){
-    $('form[data-remote]').bind("ajax:before", function(){
+    $('form[data-remote]').bind('ajax:before', function(){
       for (instance in CKEDITOR.instances){
         CKEDITOR.instances[instance].updateElement();
       }
@@ -224,18 +232,41 @@ can [:read, :create, :destroy], Ckeditor::Picture
 can [:read, :create, :destroy], Ckeditor::AttachmentFile
 ```
 
+### Pundit integration
+
+Just like CanCan, you can write this code in your config/initializers/ckeditor.rb file
+
+```ruby
+Ckeditor.setup do |config|
+  config.authorize_with :pundit
+end
+```
+
+And then, generate the policy files for model **Picture** and **AttachmentFile**
+
+```
+$ rails g ckeditor:pundit_policy
+```
+By this command, you will got two files:
+> app/policies/ckeditor/picture_policy.rb
+app/policies/ckeditor/attachment_file_policy.rb
+
+By default, only the user that logged in can access the models(with action *index* and *create*), and only the owner of the asset can **destroy** the resource.
+
+You can simply customize these two policy files as you like.
+
 ## I18n
 
 ```yml
 en:
   ckeditor:
-    page_title: "CKEditor Files Manager"
-    confirm_delete: "Delete file?"
+    page_title: 'CKEditor Files Manager'
+    confirm_delete: 'Delete file?'
     buttons:
-      cancel: "Cancel"
-      upload: "Upload"
-      delete: "Delete"
-      next: "Next"
+      cancel: 'Cancel'
+      upload: 'Upload'
+      delete: 'Delete'
+      next: 'Next'
 ```
 
 ## Tests
